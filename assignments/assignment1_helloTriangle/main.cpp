@@ -11,9 +11,9 @@ const int SCREEN_HEIGHT = 720;
 //global variable in main.cpp, or in main()
 float vertices[21] = {
 	//x   //y  //z   //r  //g  //b  //a
-	-0.5, -0.5, 0.0, 1.0, 0.0, 0.0, 1.0, //Bottom left
-	 0.5, -0.5, 0.0, 0.0, 1.0, 0.0, 1.0, //Bottom right
-	 0.0,  0.5, 0.0, 0.0, 0.0, 1.0, 1.0  //Top center
+	-0.5, -0.5, 0.0, 0.5, 0.2, 0.8, 1.0, //Bottom left
+	 0.5, -0.5, 0.0, 0.0, 0.5, 0.0, 1.0, //Bottom right
+	 0.0,  0.5, 0.0, 0.1, 0.1, 1.0, 1.0  //Top center
 };//can also be written a just 1 long array of floats
 
 //main.cpp
