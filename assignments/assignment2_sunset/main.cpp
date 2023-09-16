@@ -11,17 +11,28 @@
 
 unsigned int createShader(GLenum shaderType, const char* sourceCode);
 unsigned int createShaderProgram(const char* vertexShaderSource, const char* fragmentShaderSource);
-unsigned int createVAO(float* vertexData, int numVertices);
+unsigned int createVAO(Vertex* vertexData, int numVertices, unsigned int* indicesData, int numIndices);
 void framebufferSizeCallback(GLFWwindow* window, int width, int height);
 
 const int SCREEN_WIDTH = 1080;
 const int SCREEN_HEIGHT = 720;
 
-float vertices[9] = {
-	//x   //y  //z   
-	-0.5, -0.5, 0.0, 
-	 0.5, -0.5, 0.0,
-	 0.0,  0.5, 0.0 
+struct Vertex {
+	float x, y, z;
+	float u, v;
+};
+
+Vertex vertices[4] = {
+	//x     y    z    u    v
+	{-0.8, -0.8, 0.0, 0.0, 0.0}, //Bottom left
+	{0.8, -0.8, 0.0, 1.0, 0.0}, //Bottom right
+	{ 0.8, 0.8, 0.0, 1.0, 1.0},  //Top right
+	{ -0.8, 0.8, 0.0, 0.0, 1.0}  //Top left
+};
+
+unsigned int indices[6] = {
+	0.8, 0.8, 0.0, // Triangle 1
+	-0.8, -0.8, 0.0 // Triangle 2
 };
 
 float triangleColor[3] = { 1.0f, 0.5f, 0.0f };
@@ -73,6 +84,8 @@ int main() {
 		glUniform1f(glGetUniformLocation(shader,"_Brightness"), triangleBrightness);
 
 		glDrawArrays(GL_TRIANGLES, 0, 3);
+
+		glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, NULL);
 
 		//Render UI
 		{
@@ -140,7 +153,8 @@ unsigned int createShaderProgram(const char* vertexShaderSource, const char* fra
 	return shaderProgram;
 }
 
-unsigned int createVAO(float* vertexData, int numVertices) {
+unsigned int createVAO(Vertex* vertexData, int numVertices, unsigned int* indicesData, int numIndices) {
+	/*
 	unsigned int vao;
 	glGenVertexArrays(1, &vao);
 	glBindVertexArray(vao);
@@ -155,8 +169,22 @@ unsigned int createVAO(float* vertexData, int numVertices) {
 	//Position attribute
 	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, sizeof(float) * 3, (const void*)0);
 	glEnableVertexAttribArray(0);
+	*/
 
-	return vao;
+	unsigned int ebo;
+	glGenBuffers(1, &ebo);
+	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, ebo);
+	glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(unsigned int) * numIndices, indicesData, GL_STATIC_DRAW);
+
+	//Position
+	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, sizeof(Vertex), (const void*)offsetof(Vertex, x));
+	glEnableVertexAttribArray(0);
+
+	//UV
+	glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, sizeof(Vertex), (const void*)(offsetof(Vertex, u)));
+	glEnableVertexAttribArray(1);
+
+	return ebo;
 }
 
 void framebufferSizeCallback(GLFWwindow* window, int width, int height)

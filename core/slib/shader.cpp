@@ -83,6 +83,8 @@ namespace slib {
 		glUniform1f(glGetUniformLocation(m_id, name.c_str()), v);
 	}
 
+	//Need to talk to professor about these
+	/*
 	void setVec2(const std::string& name, float x, float y) const
 	{
 		
@@ -97,4 +99,5 @@ namespace slib {
 	{
 
 	}
+	*/
 }
