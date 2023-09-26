@@ -1,4 +1,5 @@
 #include "shader.h"
+#include "../ew/external/glad.h"
 
 namespace slib {
 	std::string loadShaderSourceFromFile(const std::string& filePath)
@@ -13,7 +14,7 @@ namespace slib {
 		return buffer.str();
 	}
 
-	unsigned int createrShader(GLenum shaderType, const char* sourceCode) {
+	unsigned int createShader(GLenum shaderType, const char* sourceCode) {
 		//Create the new shader object
 		unsigned int shader = glCreateShader(shaderType);
 		//Supply the shader object with source code
@@ -29,15 +30,14 @@ namespace slib {
 			glGetShaderInfoLog(shader, 512, NULL, infoLog);
 			printf("Failed to compile shader: %s", infoLog);
 		}
-
 		return shader;
-	};
+	}
 
 	unsigned int createShaderProgram(const char* vertexShaderSource, const char* fragmentShaderSource) {
 		//Create a new vertex shader object
 		unsigned int vertexShader = createShader(GL_VERTEX_SHADER, vertexShaderSource);
 
-		//Create a new vertex shader object
+		//Create a new fragment shader object
 		unsigned int fragmentShader = createShader(GL_FRAGMENT_SHADER, fragmentShaderSource);
 
 		unsigned int shaderProgram = glCreateProgram();
@@ -59,7 +59,7 @@ namespace slib {
 		glDeleteShader(fragmentShader);
 
 		return shaderProgram;
-	};
+	}
 
 
 	//Shader class
@@ -83,21 +83,18 @@ namespace slib {
 		glUniform1f(glGetUniformLocation(m_id, name.c_str()), v);
 	}
 
-	//Need to talk to professor about these
-	/*
-	void setVec2(const std::string& name, float x, float y) const
+	void Shader::setVec2(const std::string& name, float x, float y) const
 	{
-		
+		glUniform2f(glGetUniformLocation(m_id, name.c_str()), x, y);
 	}
 
-	void setVec3(const std::string& name, float x, float y, float z) const
+	void Shader::setVec3(const std::string& name, float x, float y, float z) const
 	{
-
+		glUniform3f(glGetUniformLocation(m_id, name.c_str()), x, y, z);
 	}
 
-	void setVec4(const std::string& name, float x, float y, float z, float w) const
+	void Shader::setVec4(const std::string& name, float x, float y, float z, float w) const
 	{
-
+		glUniform4f(glGetUniformLocation(m_id, name.c_str()), x, y, z, w);
 	}
-	*/
 }
