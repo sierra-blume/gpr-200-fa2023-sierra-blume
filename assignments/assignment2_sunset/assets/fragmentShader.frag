@@ -11,7 +11,8 @@ uniform vec3 sunColor[1];
 uniform vec3 hillColor[1];
 uniform float sunSpeed;
 uniform float sunRadius;
-float circleSDF(vec2 p, float r){
+float circleSDF(vec2 p, float r)
+{
     return length(p)-r;
 }
 
@@ -57,4 +58,3 @@ void main()
 	// Output to screen
 	FragColor = vec4(bgColor, 1.0);
 }
-
