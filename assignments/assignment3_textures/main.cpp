@@ -7,8 +7,8 @@
 #include <imgui.h>
 #include <imgui_impl_glfw.h>
 #include <imgui_impl_opengl3.h>
-
 #include <ew/shader.h>
+#include <slib/texture.h>
 
 struct Vertex {
 	float x, y, z;
@@ -63,6 +63,11 @@ int main() {
 	unsigned int quadVAO = createVAO(vertices, 4, indices, 6);
 
 	glBindVertexArray(quadVAO);
+
+	unsigned int galaxyTexture = loadTexture("assets/spaceBackground.jpg", GL_REPEAT, GL_LINEAR);
+	//Bind to texture unit 0
+	glActiveTexture(GL_TEXTURE0);
+	glBindTexture(GL_TEXTURE_2D, galaxyTexture);
 
 	while (!glfwWindowShouldClose(window)) {
 		glfwPollEvents();
