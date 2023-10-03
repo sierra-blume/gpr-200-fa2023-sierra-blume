@@ -9,6 +9,7 @@
 #include <imgui_impl_opengl3.h>
 #include <ew/shader.h>
 #include <slib/texture.h>
+#include <slib/shader.h>
 
 struct Vertex {
 	float x, y, z;
@@ -31,6 +32,12 @@ unsigned short indices[6] = {
 	0, 1, 2,
 	2, 3, 0
 };
+
+float distStrength = 0.5f;
+float tiling = 1.0f;
+float moveSpeed = 1.0f;
+
+bool showImGUIDemoWindow = true;
 
 int main() {
 	printf("Initializing...");
@@ -58,25 +65,62 @@ int main() {
 	ImGui_ImplGlfw_InitForOpenGL(window, true);
 	ImGui_ImplOpenGL3_Init();
 
-	ew::Shader shader("assets/vertexShader.vert", "assets/fragmentShader.frag");
+	slib::Shader shader("assets/vertexShader.vert", "assets/fragmentShader.frag");
+
+	//Create a different shader for background vs character
+	slib::Shader backgroundShader("assets/background.vert", "assets/background.frag");
+	slib::Shader characterShader("assets/character.vert", "assets/character.frag");
 
 	unsigned int quadVAO = createVAO(vertices, 4, indices, 6);
 
-	glBindVertexArray(quadVAO);
-
 	unsigned int galaxyTexture = loadTexture("assets/spaceBackground.jpg", GL_REPEAT, GL_LINEAR);
-	//Bind to texture unit 0
-	glActiveTexture(GL_TEXTURE0);
-	glBindTexture(GL_TEXTURE_2D, galaxyTexture);
+	unsigned int planetTexture = loadTexture("assets/mercuryTexture.png", GL_REPEAT, GL_LINEAR);
+
+	unsigned int distortion = loadTexture("assets/noiseTexture.png", GL_REPEAT, GL_LINEAR);
+
+	unsigned int characterTexture = loadTexture("assets/goosewithshoesinspace(big).png", GL_REPEAT, GL_NEAREST);
+
 
 	while (!glfwWindowShouldClose(window)) {
 		glfwPollEvents();
 		glClearColor(0.3f, 0.4f, 0.9f, 1.0f);
 		glClear(GL_COLOR_BUFFER_BIT);
 
-		//Set uniforms
-		shader.use();
+		glBindVertexArray(quadVAO);
 
+		//Background shader
+		backgroundShader.use();
+		glActiveTexture(GL_TEXTURE0);
+		glBindTexture(GL_TEXTURE_2D, galaxyTexture);
+		glActiveTexture(GL_TEXTURE1);
+		glBindTexture(GL_TEXTURE_2D, planetTexture);
+		glActiveTexture(GL_TEXTURE2);
+		glBindTexture(GL_TEXTURE_2D, distortion);
+
+		//Set uniforms
+		backgroundShader.setInt("_GalaxyTexture", 0);
+		backgroundShader.setInt("_PlanetTexture", 1);
+		backgroundShader.setInt("_Distortion", 2);
+		backgroundShader.setFloat("iTime", (float)glfwGetTime());
+		backgroundShader.setFloat("_DistStrength", distStrength);
+		backgroundShader.setFloat("_Tiling", tiling);
+
+		//Draw quad
+		glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_SHORT, NULL);
+
+		//Character shader
+		characterShader.use();
+		glActiveTexture(GL_TEXTURE0);
+		glBindTexture(GL_TEXTURE_2D, characterTexture);
+		glEnable(GL_BLEND);
+		glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+
+		//Set uniforms
+		characterShader.setInt("_CharacterTexture", 0);
+		characterShader.setFloat("iTime", (float)glfwGetTime());
+		characterShader.setFloat("_moveSpeed", moveSpeed);
+
+		//Draw quad
 		glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_SHORT, NULL);
 
 		//Render UI
@@ -86,6 +130,10 @@ int main() {
 			ImGui::NewFrame();
 
 			ImGui::Begin("Settings");
+			ImGui::Checkbox("Show Demo Window", &showImGUIDemoWindow);
+			ImGui::SliderFloat("Distortion Intensity", &distStrength, 0.0f, 5.0f);
+			ImGui::SliderFloat("Character Movement Speed", &moveSpeed, 0.0f, 10.0f);
+			ImGui::SliderFloat("Tiling", &tiling, 1.0f, 10.0f);
 			ImGui::End();
 
 			ImGui::Render();
