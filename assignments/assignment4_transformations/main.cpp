@@ -12,6 +12,8 @@
 #include <ew/ewMath/vec3.h>
 #include <ew/procGen.h>
 
+#include <slib/transformations.h>
+
 void framebufferSizeCallback(GLFWwindow* window, int width, int height);
 
 //Square aspect ratio for now. We will account for this with projection later.
@@ -53,6 +55,9 @@ int main() {
 
 	ew::Shader shader("assets/vertexShader.vert", "assets/fragmentShader.frag");
 	
+	//Creating base transform object
+	slib::Transform transform;
+
 	//Cube mesh
 	ew::Mesh cubeMesh(ew::createCube(0.5f));
 	
@@ -64,6 +69,8 @@ int main() {
 
 		//Set uniforms
 		shader.use();
+		shader.setMat4("_Model", transform.getModelMatrix());
+		cubeMesh.draw();
 
 		//TODO: Set model matrix uniform
 
