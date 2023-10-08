@@ -56,10 +56,18 @@ int main() {
 	ew::Shader shader("assets/vertexShader.vert", "assets/fragmentShader.frag");
 	
 	//Creating base transform object
-	slib::Transform transform;
+	int const NUM_CUBES = 4;
+	slib::Transform transform[NUM_CUBES];
+	transform[0].position = ew::Vec3(-0.5, 0.5, 0.0);
+	transform[1].position = ew::Vec3(0.5, 0.5, 0.0);
+	transform[2].position = ew::Vec3(-0.5, -0.5, 0.0);
+	transform[3].position = ew::Vec3(0.5, -0.5, 0.0);
 
 	//Cube mesh
-	ew::Mesh cubeMesh(ew::createCube(0.5f));
+	ew::Mesh cubeMeshTopL(ew::createCube(0.5f));
+	ew::Mesh cubeMeshTopR(ew::createCube(0.5f));
+	ew::Mesh cubeMeshBotL(ew::createCube(0.5f));
+	ew::Mesh cubeMeshBotR(ew::createCube(0.5f));
 	
 	while (!glfwWindowShouldClose(window)) {
 		glfwPollEvents();
@@ -69,23 +77,41 @@ int main() {
 
 		//Set uniforms
 		shader.use();
-		shader.setMat4("_Model", transform.getModelMatrix());
-		cubeMesh.draw();
+		shader.setMat4("_Model", transform[0].getModelMatrix());
+		cubeMeshTopL.draw();
+		
+		shader.setMat4("_Model", transform[1].getModelMatrix());
+		cubeMeshTopR.draw();
 
-		//TODO: Set model matrix uniform
+		shader.setMat4("_Model", transform[2].getModelMatrix());
+		cubeMeshBotL.draw();
 
-		cubeMesh.draw();
-
+		shader.setMat4("_Model", transform[3].getModelMatrix());
+		cubeMeshBotR.draw();
+		
 		//Render UI
 		{
 			ImGui_ImplGlfw_NewFrame();
 			ImGui_ImplOpenGL3_NewFrame();
 			ImGui::NewFrame();
 
-			ImGui::Begin("Transform");
-			ImGui::DragFloat3("Position", &transform.position.x, 0.05f);
-			ImGui::DragFloat3("Rotation", &transform.rotation.x, 1.0f);
-			ImGui::DragFloat3("Scale", &transform.scale.x, 0.05f);
+			
+			for (int i = 0; i < NUM_CUBES; i++)
+			{
+				ImGui::PushID(i);
+				if (ImGui::CollapsingHeader("Transform"))
+				{
+					ImGui::DragFloat3("Position", &transform[i].position.x, 0.05f);
+					ImGui::DragFloat3("Rotation", &transform[i].rotation.x, 1.0f);
+					ImGui::DragFloat3("Scale", &transform[i].scale.x, 0.05f);
+				}
+				ImGui::PopID();
+			}
+			
+			//ImGui::Begin("Transform");
+			//ImGui::DragFloat3("Position", &transform[0].position.x, 0.05f);
+			//ImGui::DragFloat3("Rotation", &transform[0].rotation.x, 1.0f);
+			//ImGui::DragFloat3("Scale", &transform[0].scale.x, 0.05f);
 			ImGui::End();
 
 			ImGui::Render();
