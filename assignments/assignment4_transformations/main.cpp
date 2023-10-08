@@ -64,10 +64,7 @@ int main() {
 	transform[3].position = ew::Vec3(0.5, -0.5, 0.0);
 
 	//Cube mesh
-	ew::Mesh cubeMeshTopL(ew::createCube(0.5f));
-	ew::Mesh cubeMeshTopR(ew::createCube(0.5f));
-	ew::Mesh cubeMeshBotL(ew::createCube(0.5f));
-	ew::Mesh cubeMeshBotR(ew::createCube(0.5f));
+	ew::Mesh cubeMesh(ew::createCube(0.5f));
 	
 	while (!glfwWindowShouldClose(window)) {
 		glfwPollEvents();
@@ -77,17 +74,12 @@ int main() {
 
 		//Set uniforms
 		shader.use();
-		shader.setMat4("_Model", transform[0].getModelMatrix());
-		cubeMeshTopL.draw();
-		
-		shader.setMat4("_Model", transform[1].getModelMatrix());
-		cubeMeshTopR.draw();
 
-		shader.setMat4("_Model", transform[2].getModelMatrix());
-		cubeMeshBotL.draw();
-
-		shader.setMat4("_Model", transform[3].getModelMatrix());
-		cubeMeshBotR.draw();
+		for (int i = 0; i < NUM_CUBES; i++)
+		{
+			shader.setMat4("_Model", transform[i].getModelMatrix());
+			cubeMesh.draw();
+		}
 		
 		//Render UI
 		{
@@ -95,6 +87,7 @@ int main() {
 			ImGui_ImplOpenGL3_NewFrame();
 			ImGui::NewFrame();
 
+			ImGui::Begin("Transform");
 			
 			for (int i = 0; i < NUM_CUBES; i++)
 			{
