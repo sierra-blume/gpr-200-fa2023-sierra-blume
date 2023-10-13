@@ -55,6 +55,48 @@ namespace slib {
 			0.0, 0.0, 0.0, 1.0);
 	};
 
+	//Creates a right handed view space
+	//eye = eye (camera) position
+	//target = position to look at
+	//up = up axis, usually (0,1,0)
+	inline ew::Mat4 LookAt(ew::Vec3 eye, ew::Vec3 target, ew::Vec3 worldUp)
+	{
+		ew::Vec3 forward = eye - target;
+		forward = ew::Normalize(forward);
+		
+		//use ew::Cross for cross product
+		ew::Vec3 right = ew::Cross(worldUp, forward);
+		right = ew::Normalize(right);
+
+		ew::Vec3 up = Cross(forward, right);
+		up = Normalize(up);
+
+		ew::Mat4 viewMat = {
+			right.x,   right.y,   right.z,   -ew::Dot(right, eye),
+			up.x,      up.y,      up.z,      -ew::Dot(up, eye),
+			forward.x, forward.y, forward.z, -ew::Dot(forward, eye),
+			0.0,       0.0,       0.0,       1.0};
+
+		return viewMat;
+	};
+
+	//Orthographic projection
+	inline ew::Mat4 Orthographic(float height, float aspect, float near, float far)
+	{
+		//assignment 2
+		//use aspect ration
+		//calculate width by using corners
+		//uv.x *= iResolution.x/iResolution.y
+		//float width = height * aspect;
+	};
+
+	//Perspective projection
+	//fov = vertical aspect ratio (radians)
+	inline ew::Mat4 Perspective(float fov, float aspect, float near, float far)
+	{
+
+	};
+
 	struct Transform {
 		ew::Vec3 position = ew::Vec3(0.0f, 0.0f, 0.0f);
 		ew::Vec3 rotation = ew::Vec3(5.0f, 5.0f, 0.0f);  //Euler angles (degrees)
