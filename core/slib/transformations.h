@@ -83,18 +83,29 @@ namespace slib {
 	//Orthographic projection
 	inline ew::Mat4 Orthographic(float height, float aspect, float near, float far)
 	{
-		//assignment 2
-		//use aspect ration
-		//calculate width by using corners
-		//uv.x *= iResolution.x/iResolution.y
-		//float width = height * aspect;
+		float width = height * aspect;
+		float right = width / 2;
+		float left = -(right);
+		float top = height / 2;
+		float bottom = -(top);
+		ew::Mat4 orthoProj = {
+		2 / (right - left), 0.0,                0.0,                 -((right + left) / (right - left)),
+		0.0,                2 / (top - bottom), 0.0,                 -((top + bottom) / (top - bottom)),
+		0.0,                0.0,                -(2 / (far - near)), -((far + near) / (far - near)),
+		0.0,                0.0,                0.0,                 1.0};
+		return orthoProj;
 	};
 
 	//Perspective projection
 	//fov = vertical aspect ratio (radians)
 	inline ew::Mat4 Perspective(float fov, float aspect, float near, float far)
 	{
-
+		ew::Mat4 persProj = {
+		1 / (tanf(ew::Radians(fov) / 2) * aspect), 0.0,                              0.0,                           0.0,
+		0.0,                                       1 / (tanf(ew::Radians(fov) / 2)), 0.0,                           0.0,
+		0.0,                                       0.0,                              ((near + far) / (near - far)), (2 * far * near) / (near - far),
+		0.0,                                       0.0,                              -1.0,                          0.0};
+		return persProj;
 	};
 
 	struct Transform {
