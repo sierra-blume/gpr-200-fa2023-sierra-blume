@@ -12,6 +12,8 @@
 #include <ew/procGen.h>
 #include <ew/transform.h>
 
+#include <slib/camera.h>
+
 void framebufferSizeCallback(GLFWwindow* window, int width, int height);
 
 //Projection will account for aspect ratio!
@@ -66,6 +68,16 @@ int main() {
 		cubeTransforms[i].position.y = i / (NUM_CUBES / 2) - 0.5;
 	}
 
+	slib::Camera camera;
+	camera.position = ew::Vec3(0, 0, 5); //We will be looking down the -Z axis
+	camera.target = ew::Vec3(0, 0, 0);
+	camera.fov = 60;
+	camera.orthoSize = 6;
+	camera.nearPlane = 0.1;
+	camera.farPlane = 100;
+
+	bool* orbit = new bool(false);
+
 	while (!glfwWindowShouldClose(window)) {
 		glfwPollEvents();
 		glClearColor(0.3f, 0.4f, 0.9f, 1.0f);
@@ -90,18 +102,26 @@ int main() {
 			ImGui::NewFrame();
 
 			ImGui::Begin("Settings");
-			ImGui::Text("Cubes");
-			for (size_t i = 0; i < NUM_CUBES; i++)
-			{
-				ImGui::PushID(i);
-				if (ImGui::CollapsingHeader("Transform")) {
-					ImGui::DragFloat3("Position", &cubeTransforms[i].position.x, 0.05f);
-					ImGui::DragFloat3("Rotation", &cubeTransforms[i].rotation.x, 1.0f);
-					ImGui::DragFloat3("Scale", &cubeTransforms[i].scale.x, 0.05f);
-				}
-				ImGui::PopID();
-			}
 			ImGui::Text("Camera");
+			ImGui::Checkbox("Orbit", orbit);
+			if (orbit)
+			{
+				//figure out//
+			}
+			ImGui::DragFloat3("Positon", &camera.position.x, 10.0f);
+			ImGui::DragFloat3("Target", &camera.target.x, 10.0f);
+			ImGui::Checkbox("Orthographic", &camera.orthographic);
+			if (camera.orthographic == false)
+			{
+				ImGui::SliderFloat("FOV", &camera.fov, 0.0, 150.0);
+			}
+			if (ImGui::Button("Reset"))
+			{
+				camera.position = ew::Vec3(0, 0, 5);
+				camera.target = ew::Vec3(0, 0, 0);
+				camera.fov = 60;
+			}
+
 			ImGui::End();
 			
 			ImGui::Render();

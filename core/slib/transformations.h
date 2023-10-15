@@ -49,10 +49,29 @@ namespace slib {
 
 	//Translate x,y,z  (translate means addition)
 	inline ew::Mat4 Translate(ew::Vec3 t) {
-		return ew::Mat4(1.0, 0.0, 0.0, t.x,
-			0.0, 1.0, 0.0, t.y,
-			0.0, 0.0, 1.0, t.z,
-			0.0, 0.0, 0.0, 1.0);
+		return ew::Mat4(1.0f, 0.0f, 0.0f, t.x,
+			0.0f, 1.0f, 0.0f, t.y,
+			0.0f, 0.0f, 1.0f, t.z,
+			0.0f, 0.0f, 0.0f, 1.0f);
+	};
+
+	struct Transform {
+		ew::Vec3 position = ew::Vec3(0.0f, 0.0f, 0.0f);
+		ew::Vec3 rotation = ew::Vec3(5.0f, 5.0f, 0.0f);  //Euler angles (degrees)
+		ew::Vec3 scale = ew::Vec3(1.0f, 1.0f, 1.0f);
+		//Construct our final model matrix
+		ew::Mat4 getModelMatrix() const {
+			//Must happen in this order because scale and rotate must be done around the origin (done right to left)
+			//ew::Mat4 finalMat = Translate(position) * RotateY(ew::Radians(rotation.y)) * RotateX(ew::Radians(rotation.x)) * RotateZ(ew::Radians(rotation.z)) * Scale(scale);
+			//return finalMat;
+			ew::Mat4 pos = Translate(position);
+			ew::Mat4 rotY = RotateY(ew::Radians(rotation.y));
+			ew::Mat4 rotX = RotateX(ew::Radians(rotation.x));
+			ew::Mat4 rotZ = RotateZ(ew::Radians(rotation.z));
+			ew::Mat4 sca = Scale(scale);
+			ew::Mat4 finalMat = pos * rotY * rotX * rotZ * sca;
+			return finalMat;
+		}
 	};
 
 	//Creates a right handed view space
@@ -106,16 +125,5 @@ namespace slib {
 		0.0,                                       0.0,                              ((near + far) / (near - far)), (2 * far * near) / (near - far),
 		0.0,                                       0.0,                              -1.0,                          0.0};
 		return persProj;
-	};
-
-	struct Transform {
-		ew::Vec3 position = ew::Vec3(0.0f, 0.0f, 0.0f);
-		ew::Vec3 rotation = ew::Vec3(5.0f, 5.0f, 0.0f);  //Euler angles (degrees)
-		ew::Vec3 scale = ew::Vec3(1.0f, 1.0f, 1.0f);
-		//Construct our final model matrix
-		ew::Mat4 getModelMatrix() const {
-			//Must happen in this order because scale and rotate must be done around the origin (done right to left)
-			return Translate(position) * RotateY(ew::Radians(rotation.y)) * RotateX(ew::Radians(rotation.x)) * RotateZ(ew::Radians(rotation.z)) * Scale(scale);
-		}
 	};
 }
