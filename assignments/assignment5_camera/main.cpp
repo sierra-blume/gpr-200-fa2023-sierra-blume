@@ -23,6 +23,7 @@ const int SCREEN_HEIGHT = 720;
 const int NUM_CUBES = 4;
 ew::Transform cubeTransforms[NUM_CUBES];
 slib::Camera camera;
+slib::CameraControls controls;
 
 int main() {
 	printf("Initializing...");
@@ -78,7 +79,7 @@ int main() {
 	camera.farPlane = 100;
 
 	bool orbit = true;
-	float orbitSpeed = 1.0;
+	float orbitSpeed = 0.1;
 
 	while (!glfwWindowShouldClose(window)) {
 		glfwPollEvents();
@@ -99,6 +100,8 @@ int main() {
 			cubeMesh.draw();
 		}
 
+		//moveCamera(window, &camera, &controls);
+
 		//Render UI
 		{
 			ImGui_ImplGlfw_NewFrame();
@@ -111,7 +114,7 @@ int main() {
 			if (orbit)
 			{
 				ImGui::DragFloat("Orbit Speed", &orbitSpeed, 0.05f);
-				/*
+				
 				ew::Vec3 forward = camera.target - camera.position;
 				forward = ew::Normalize(forward);
 
@@ -120,9 +123,9 @@ int main() {
 				right = ew::Normalize(right);
 
 				camera.position += right * orbitSpeed;
-				*/
-				camera.position.x = cosf((float)glfwGetTime() * orbitSpeed) * 5.0;
-				camera.position.z = sinf((float)glfwGetTime() * orbitSpeed) * 5.0;
+				
+				//camera.position.x = cosf((float)glfwGetTime() * orbitSpeed) * 5.0;
+				//camera.position.z = sinf((float)glfwGetTime() * orbitSpeed) * 5.0;
 			}
 			ImGui::DragFloat3("Positon", &camera.position.x, 0.5f);
 			ImGui::DragFloat3("Target", &camera.target.x, 0.5f);
@@ -159,6 +162,56 @@ int main() {
 		glfwSwapBuffers(window);
 	}
 	printf("Shutting down...");
+}
+
+void moveCamera(GLFWwindow* window, slib::Camera* camera, slib::CameraControls* controls)
+{
+	//If right mouse is not held, release cursor and return early
+	if (!glfwGetMouseButton(window, GLFW_MOUSE_BUTTON_2)) {
+		//Release cursor
+		glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_NORMAL);
+		controls->firstMouse = true;
+		return;
+	}
+
+	//GLFW_CURSOR_DISABLED hides the cursor, but the position will still be changed as we move our mouse
+	glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
+
+	//Get screen mouse position this frame
+	double mouseX, mouseY;
+	glfwGetCursorPos(window, &mouseX, &mouseY);
+
+	//If we just started right clicking, set prevMouse values to current position
+	//This prevents a bug where the camera moves as soon as we click
+	if (controls->firstMouse)
+	{
+		controls->firstMouse = false;
+		controls->prevMouseX = mouseX;
+		controls->prevMouseY = mouseY;
+	}
+
+	//Get mouse position delta for this frame
+	float deltaX = mouseX - controls->prevMouseX;
+	float deltaY = mouseY - controls->prevMouseY;
+
+	//Add to yaw and pitch
+	controls->yaw += deltaX * 0.1;
+	controls->pitch -= deltaY * 0.1;
+	
+	//Clamp pitch between -89 and 89 degrees
+	float pitchMin = -89;
+	float pitchMax = 89;
+	controls->pitch = slib::clamp(controls->pitch, pitchMin, pitchMax);
+
+	//Remember previous mouse position
+	controls->prevMouseX = mouseX;
+	controls->prevMouseY = mouseY;
+
+	//Construct forward vector using yaw and pitch (don't forget to convert to radians!)
+	//ew::Vec3 forward = ???
+
+	//By setting target to a point in front of the camera along its forward direction, our LookAt will be updated accordingly when rendering
+	//camera->target = camera->position + forward;
 }
 
 void framebufferSizeCallback(GLFWwindow* window, int width, int height)
