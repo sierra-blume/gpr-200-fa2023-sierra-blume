@@ -22,6 +22,7 @@ const int SCREEN_HEIGHT = 720;
 
 const int NUM_CUBES = 4;
 ew::Transform cubeTransforms[NUM_CUBES];
+slib::Camera camera;
 
 int main() {
 	printf("Initializing...");
@@ -68,15 +69,16 @@ int main() {
 		cubeTransforms[i].position.y = i / (NUM_CUBES / 2) - 0.5;
 	}
 
-	slib::Camera camera;
 	camera.position = ew::Vec3(0, 0, 5); //We will be looking down the -Z axis
 	camera.target = ew::Vec3(0, 0, 0);
+	camera.aspectRatio = (float)SCREEN_WIDTH / (float)SCREEN_HEIGHT;
 	camera.fov = 60;
 	camera.orthoSize = 6;
 	camera.nearPlane = 0.1;
 	camera.farPlane = 100;
 
-	bool* orbit = new bool(false);
+	bool orbit = true;
+	float orbitSpeed = 1.0;
 
 	while (!glfwWindowShouldClose(window)) {
 		glfwPollEvents();
@@ -86,6 +88,8 @@ int main() {
 
 		//Set uniforms
 		shader.use();
+		shader.setMat4("_View", camera.ViewMatrix());
+		shader.setMat4("_Projection", camera.ProjectionMatrix());
 
 		//TODO: Set model matrix uniform
 		for (size_t i = 0; i < NUM_CUBES; i++)
@@ -103,23 +107,47 @@ int main() {
 
 			ImGui::Begin("Settings");
 			ImGui::Text("Camera");
-			ImGui::Checkbox("Orbit", orbit);
+			ImGui::Checkbox("Orbit", &orbit);
 			if (orbit)
 			{
-				//figure out//
+				ImGui::DragFloat("Orbit Speed", &orbitSpeed, 0.05f);
+				/*
+				ew::Vec3 forward = camera.target - camera.position;
+				forward = ew::Normalize(forward);
+
+				//use ew::Cross for cross product
+				ew::Vec3 right = ew::Cross(forward, ew::Vec3(0, 1, 0));
+				right = ew::Normalize(right);
+
+				camera.position += right * orbitSpeed;
+				*/
+				camera.position.x = cosf((float)glfwGetTime() * orbitSpeed) * 5.0;
+				camera.position.z = sinf((float)glfwGetTime() * orbitSpeed) * 5.0;
 			}
-			ImGui::DragFloat3("Positon", &camera.position.x, 10.0f);
-			ImGui::DragFloat3("Target", &camera.target.x, 10.0f);
+			ImGui::DragFloat3("Positon", &camera.position.x, 0.5f);
+			ImGui::DragFloat3("Target", &camera.target.x, 0.5f);
 			ImGui::Checkbox("Orthographic", &camera.orthographic);
-			if (camera.orthographic == false)
+			if (camera.orthographic == true)
 			{
-				ImGui::SliderFloat("FOV", &camera.fov, 0.0, 150.0);
+				ImGui::DragFloat("Ortho Height", &camera.orthoSize, 0.05f);
 			}
+			else
+			{
+				ImGui::SliderFloat("FOV", &camera.fov, 0.0, 180.0);
+			}
+			ImGui::DragFloat("Near Plane", &camera.nearPlane, 0.05f, 0.001);
+			ImGui::DragFloat("Far Plane", &camera.farPlane, 0.05f, 0.001);
+
 			if (ImGui::Button("Reset"))
 			{
-				camera.position = ew::Vec3(0, 0, 5);
+				camera.position = ew::Vec3(0, 0, 5); //We will be looking down the -Z axis
 				camera.target = ew::Vec3(0, 0, 0);
+				camera.aspectRatio = (float)SCREEN_WIDTH / (float)SCREEN_HEIGHT;
 				camera.fov = 60;
+				camera.orthoSize = 6;
+				camera.nearPlane = 0.1;
+				camera.farPlane = 100;
+				bool orbit = true;
 			}
 
 			ImGui::End();
@@ -136,5 +164,6 @@ int main() {
 void framebufferSizeCallback(GLFWwindow* window, int width, int height)
 {
 	glViewport(0, 0, width, height);
+	camera.aspectRatio = (float)(width) / (float)(height);
 }
 

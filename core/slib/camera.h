@@ -6,14 +6,14 @@
 
 namespace slib {
 	struct Camera {
-		ew::Vec3 position; //Camera body position
-		ew::Vec3 target; //Position to look at
-		float fov; //Vertical field of view in degrees
-		float aspectRatio; //Screen width / Screen height
-		float nearPlane; //Near plane distance (+Z)
-		float farPlane; //Far plane distance (+Z)
-		bool orthographic; //Perspective or orthographic?
-		float orthoSize; //Height of orthographic frustrum
+		ew::Vec3 position = ew::Vec3(0.0, 0.0, 5.0); //Camera body position
+		ew::Vec3 target = ew::Vec3(0.0,0.0,0.0); //Position to look at
+		float fov = 60; //Vertical field of view in degrees
+		float aspectRatio = 1080/720; //Screen width / Screen height
+		float nearPlane = 0.1; //Near plane distance (+Z)
+		float farPlane = 100.0; //Far plane distance (+Z)
+		bool orthographic = true; //Perspective or orthographic?
+		float orthoSize = 6; //Height of orthographic frustrum
 		ew::Mat4 ViewMatrix(); //World->View
 		ew::Mat4 ProjectionMatrix(); //View->Clip
 	};
