@@ -62,15 +62,7 @@ namespace slib {
 		//Construct our final model matrix
 		ew::Mat4 getModelMatrix() const {
 			//Must happen in this order because scale and rotate must be done around the origin (done right to left)
-			//ew::Mat4 finalMat = Translate(position) * RotateY(ew::Radians(rotation.y)) * RotateX(ew::Radians(rotation.x)) * RotateZ(ew::Radians(rotation.z)) * Scale(scale);
-			//return finalMat;
-			ew::Mat4 pos = Translate(position);
-			ew::Mat4 rotY = RotateY(ew::Radians(rotation.y));
-			ew::Mat4 rotX = RotateX(ew::Radians(rotation.x));
-			ew::Mat4 rotZ = RotateZ(ew::Radians(rotation.z));
-			ew::Mat4 sca = Scale(scale);
-			ew::Mat4 finalMat = pos * rotY * rotX * rotZ * sca;
-			return finalMat;
+			return ew::Mat4(slib::Translate(position) * slib::RotateY(ew::Radians(rotation.y)) * slib::RotateX(ew::Radians(rotation.x)) * slib::RotateZ(ew::Radians(rotation.z)) * slib::Scale(scale));
 		}
 	};
 
