@@ -15,6 +15,7 @@
 #include <slib/camera.h>
 
 void framebufferSizeCallback(GLFWwindow* window, int width, int height);
+void moveCamera(GLFWwindow* window, slib::Camera* camera, slib::CameraControls* controls);
 
 //Projection will account for aspect ratio!
 const int SCREEN_WIDTH = 1080;
@@ -78,7 +79,7 @@ int main() {
 	camera.nearPlane = 0.1;
 	camera.farPlane = 100;
 
-	bool orbit = true;
+	bool orbit = false;
 	float orbitSpeed = 0.1;
 
 	while (!glfwWindowShouldClose(window)) {
@@ -100,7 +101,7 @@ int main() {
 			cubeMesh.draw();
 		}
 
-		//moveCamera(window, &camera, &controls);
+		moveCamera(window, &camera, &controls);
 
 		//Render UI
 		{
@@ -140,6 +141,8 @@ int main() {
 			}
 			ImGui::DragFloat("Near Plane", &camera.nearPlane, 0.05f, 0.001);
 			ImGui::DragFloat("Far Plane", &camera.farPlane, 0.05f, 0.001);
+
+			//"%f", theVariable
 
 			if (ImGui::Button("Reset"))
 			{
@@ -208,10 +211,26 @@ void moveCamera(GLFWwindow* window, slib::Camera* camera, slib::CameraControls* 
 	controls->prevMouseY = mouseY;
 
 	//Construct forward vector using yaw and pitch (don't forget to convert to radians!)
-	//ew::Vec3 forward = ???
+	float yawRad = ew::Radians(controls->yaw);
+	float pitchRad = ew::Radians(controls->pitch);
+
+	ew::Vec3 forward = ew::Vec3(sin(yawRad) * cos(pitchRad), sin(pitchRad), -cos(yawRad) * cos(pitchRad));
 
 	//By setting target to a point in front of the camera along its forward direction, our LookAt will be updated accordingly when rendering
-	//camera->target = camera->position + forward;
+	camera->target = camera->position + forward;
+
+	//TODO: Using camera forward and world up (0,1,0), construct camera right and up vectors. Graham-schmidt process!
+	ew::Vec3 worldUp = ew::Vec3(0, 1, 0);
+	ew::Vec3 right = ew::Normalize(ew::Cross(forward, worldUp));
+	ew::Vec3 up = ew::Normalize(ew::Cross(right, forward));
+
+	//TODO: Keyboard controls for moving along forward, back, right, left, up, and down
+	if (glfwGetKey(window, GLFW_KEY_W)) {
+		camera->position += forward * controls->moveSpeed;
+	}
+	camera->target = camera->position + forward;
+
+	//Complete code for the rest of the keys//
 }
 
 void framebufferSizeCallback(GLFWwindow* window, int width, int height)
