@@ -15,7 +15,7 @@
 #include <slib/camera.h>
 
 void framebufferSizeCallback(GLFWwindow* window, int width, int height);
-void moveCamera(GLFWwindow* window, slib::Camera* camera, slib::CameraControls* controls);
+void moveCamera(GLFWwindow* window, slib::Camera* camera, slib::CameraControls* controls, float deltaTime);
 
 //Projection will account for aspect ratio!
 const int SCREEN_WIDTH = 1080;
@@ -82,6 +82,8 @@ int main() {
 	bool orbit = false;
 	float orbitSpeed = 0.1;
 
+	float prevTime = (float)glfwGetTime(); //Timestamp of previous frame
+
 	while (!glfwWindowShouldClose(window)) {
 		glfwPollEvents();
 		glClearColor(0.3f, 0.4f, 0.9f, 1.0f);
@@ -101,7 +103,11 @@ int main() {
 			cubeMesh.draw();
 		}
 
-		moveCamera(window, &camera, &controls);
+		float time = (float)glfwGetTime(); //Timestamp of current frame
+		float deltaTime = time - prevTime;
+		prevTime = time;
+
+		moveCamera(window, &camera, &controls, deltaTime);
 
 		//Render UI
 		{
@@ -167,7 +173,7 @@ int main() {
 	printf("Shutting down...");
 }
 
-void moveCamera(GLFWwindow* window, slib::Camera* camera, slib::CameraControls* controls)
+void moveCamera(GLFWwindow* window, slib::Camera* camera, slib::CameraControls* controls, float deltaTime)
 {
 	//If right mouse is not held, release cursor and return early
 	if (!glfwGetMouseButton(window, GLFW_MOUSE_BUTTON_2)) {
@@ -202,8 +208,8 @@ void moveCamera(GLFWwindow* window, slib::Camera* camera, slib::CameraControls* 
 	controls->pitch -= deltaY * 0.1;
 	
 	//Clamp pitch between -89 and 89 degrees
-	float pitchMin = -89;
-	float pitchMax = 89;
+	float pitchMin = -89.0;
+	float pitchMax = 89.0;
 	controls->pitch = slib::clamp(controls->pitch, pitchMin, pitchMax);
 
 	//Remember previous mouse position
@@ -216,9 +222,6 @@ void moveCamera(GLFWwindow* window, slib::Camera* camera, slib::CameraControls* 
 
 	ew::Vec3 forward = ew::Vec3(sin(yawRad) * cos(pitchRad), sin(pitchRad), -cos(yawRad) * cos(pitchRad));
 
-	//By setting target to a point in front of the camera along its forward direction, our LookAt will be updated accordingly when rendering
-	camera->target = camera->position + forward;
-
 	//TODO: Using camera forward and world up (0,1,0), construct camera right and up vectors. Graham-schmidt process!
 	ew::Vec3 worldUp = ew::Vec3(0, 1, 0);
 	ew::Vec3 right = ew::Normalize(ew::Cross(forward, worldUp));
@@ -226,11 +229,31 @@ void moveCamera(GLFWwindow* window, slib::Camera* camera, slib::CameraControls* 
 
 	//TODO: Keyboard controls for moving along forward, back, right, left, up, and down
 	if (glfwGetKey(window, GLFW_KEY_W)) {
-		camera->position += forward * controls->moveSpeed;
+		camera->position += forward * controls->moveSpeed * deltaTime;
 	}
-	camera->target = camera->position + forward;
 
-	//Complete code for the rest of the keys//
+	if (glfwGetKey(window, GLFW_KEY_S)) {
+		camera->position -= forward * controls->moveSpeed * deltaTime;
+	}
+
+	if (glfwGetKey(window, GLFW_KEY_D)) {
+		camera->position += right * controls->moveSpeed * deltaTime;
+	}
+
+	if (glfwGetKey(window, GLFW_KEY_A)) {
+		camera->position -= right * controls->moveSpeed * deltaTime;
+	}
+
+	if (glfwGetKey(window, GLFW_KEY_E)) {
+		camera->position += up * controls->moveSpeed * deltaTime;
+	}
+
+	if (glfwGetKey(window, GLFW_KEY_Q)) {
+		camera->position -= up * controls->moveSpeed * deltaTime;
+	}
+
+	//By setting target to a point in front of the camera along its forward direction, our LookAt will be updated accordingly when rendering
+	camera->target = camera->position + forward;
 }
 
 void framebufferSizeCallback(GLFWwindow* window, int width, int height)
