@@ -14,43 +14,45 @@ namespace slib {
 		//Vertices
 		float topY = height / 2;
 		//height * i - 0.5;
+		
 		float bottomY = -topY;
 
 		cylinder.vertices.push_back({0,topY,0});
+		cylinder.vertices.push_back({ 0,bottomY,0 });
+
 		float thetaStep = (2 * ew::PI) / numSegments;
 		for (int i = 0; i <= numSegments; i++)
 		{
-			float theta = 1 * thetaStep;
+			float theta = i * thetaStep;
 			ew::Vertex v;
 			v.pos.x = cos(theta) * radius;
 			v.pos.z = sin(theta) * radius;
 			v.pos.y = topY;
 			cylinder.vertices.push_back(v);
 		}
-
+		
 		for (int i = 0; i <= numSegments; i++)
 		{
-			float theta = 1 * thetaStep;
+			float theta = i * thetaStep;
 			ew::Vertex v;
 			v.pos.x = cos(theta) * radius;
 			v.pos.z = sin(theta) * radius;
 			v.pos.y = bottomY;
 			cylinder.vertices.push_back(v);
 		}
-		cylinder.vertices.push_back({0,bottomY,0});
 
 		//Indices
-		int start = numSegments + 2;
-		int center = numSegments + 1;
-
+		int start = 2;
+		int center = 0;
+		
 		//Top indices
-		for (int i = 0; i <= numSegments; i++)
+		for (int i = 0; i < numSegments; i++)
 		{
 			cylinder.indices.push_back(start+i);
 			cylinder.indices.push_back(center);
 			cylinder.indices.push_back(start + i + 1);
 		}
-
+		
 		//Bottom indices
 		for (int i = 0; i <= numSegments; i++)
 		{
@@ -58,8 +60,8 @@ namespace slib {
 			cylinder.indices.push_back(start + i);
 			cylinder.indices.push_back(start + i + 1);
 		}
-
-		int sideStart = 2;
+		/*
+		int sideStart = 1;
 		int columns = numSegments + 1;
 		for (int i = 0; i < columns; i++)
 		{
@@ -72,10 +74,13 @@ namespace slib {
 
 			//Triangle 2
 			cylinder.indices.push_back(start + 1);
-			cylinder.indices.push_back(start + columns + 1);
 			cylinder.indices.push_back(start + columns);
+			cylinder.indices.push_back(start + columns + 1);
 		}
+		*/
+		return cylinder;
 	}
+	
 
 	ew::MeshData createPlane(float width, float height, int subdivisions) {
 		ew::MeshData plane;
@@ -91,8 +96,6 @@ namespace slib {
 				plane.vertices.push_back(v);
 			}
 		}
-
-		return plane;
 
 		int columns = subdivisions + 1;
 		for (int indRow = 0; indRow < subdivisions; indRow++) {
@@ -110,5 +113,6 @@ namespace slib {
 				plane.indices.push_back(start+columns);
 			}
 		}
+		return plane;
 	}
 }

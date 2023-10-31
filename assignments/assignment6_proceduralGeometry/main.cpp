@@ -14,6 +14,7 @@
 #include <ew/transform.h>
 #include <ew/camera.h>
 #include <ew/cameraController.h>
+#include <slib/procGen.h>
 
 void framebufferSizeCallback(GLFWwindow* window, int width, int height);
 void resetCamera(ew::Camera& camera, ew::CameraController& cameraController);
@@ -82,8 +83,20 @@ int main() {
 	ew::MeshData cubeMeshData = ew::createCube(0.5f);
 	ew::Mesh cubeMesh(cubeMeshData);
 
+	ew::MeshData planeMeshData = slib::createPlane(1,1,5);
+	ew::Mesh planeMesh(planeMeshData);
+
+	ew::MeshData cylinderMeshData = slib::createCylinder(1, .5, 8);
+	ew::Mesh cylinderMesh(cylinderMeshData);
+
 	//Initialize transforms
 	ew::Transform cubeTransform;
+	ew::Transform planeTransform;
+	ew::Transform cylinderTransform;
+
+	//Moving objects to be in a line
+	planeTransform.position = ew::Vec3(1, 0, .5);
+	cylinderTransform.position = ew::Vec3(3, 0, 0);
 
 	resetCamera(camera,cameraController);
 
@@ -103,8 +116,6 @@ int main() {
 		//Clear both color buffer AND depth buffer
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-		
-
 		shader.use();
 		glBindTexture(GL_TEXTURE_2D, brickTexture);
 		shader.setInt("_Texture", 0);
@@ -120,6 +131,10 @@ int main() {
 		//Draw cube
 		shader.setMat4("_Model", cubeTransform.getModelMatrix());
 		cubeMesh.draw((ew::DrawMode)appSettings.drawAsPoints);
+		shader.setMat4("_Model", planeTransform.getModelMatrix());
+		planeMesh.draw((ew::DrawMode)appSettings.drawAsPoints);
+		shader.setMat4("_Model", cylinderTransform.getModelMatrix());
+		cylinderMesh.draw((ew::DrawMode)appSettings.drawAsPoints);
 
 		//Render UI
 		{
