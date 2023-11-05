@@ -4,24 +4,93 @@
 #include "procGen.h"
 
 namespace slib {
-	/*ew::MeshData createSphere(float radius, int numSegments) {
+	ew::MeshData createSphere(float radius, int numSegments) {
+		ew::MeshData sphere;
 
+		float thetaStep = (2 * ew::PI) / numSegments;
+		float phiStep = ew::PI / numSegments;
+		for (int row = 0; row <= numSegments; row++)
+		{
+			float phi = row * phiStep;
+			for (int col = 0; col <= numSegments; col++)
+			{
+				ew::Vertex v;
+				float theta = col * thetaStep;
+				v.pos.x = radius * cos(theta) * sin(phi);
+				v.pos.y = radius * cos(phi);
+				v.pos.z = radius * sin(theta) * sin(phi);
+				v.normal = ew::Normalize(v.pos);
+				v.uv.x = (float)col / (float)numSegments;
+				v.uv.y = (float)row / (float)numSegments;
+				sphere.vertices.push_back(v);
+			}
+		}
+		
+		//Top cap
+		int poleStart = 0;
+		int sideStart = numSegments + 1;
+		for (int i = 0; i < numSegments; i++)
+		{
+			sphere.indices.push_back(sideStart + i);
+			sphere.indices.push_back(poleStart + i);
+			sphere.indices.push_back(sideStart + i + 1);
+		}
+		
+		int columns = numSegments + 1;
+		//Skip top and bottom poles
+		for (int row = 1; row < numSegments - 1; row++)
+		{
+			for (int col = 0; col < numSegments; col++)
+			{
+				int start = row * columns + col;
+				//Triangle 1
+				sphere.indices.push_back(start);
+				sphere.indices.push_back(start + 1);
+				sphere.indices.push_back(start + columns);
+
+				//Triangle 2
+				sphere.indices.push_back(start + 1);
+				sphere.indices.push_back(start + columns + 1);
+				sphere.indices.push_back(start + columns);
+			}
+		}
+
+		//Top cap
+		poleStart = numSegments * (numSegments + 1);
+		sideStart = poleStart - numSegments - 1;
+		for (int i = 0; i < numSegments; i++)
+		{
+			sphere.indices.push_back(sideStart + i + 1);
+			sphere.indices.push_back(poleStart + i);
+			sphere.indices.push_back(sideStart + i);
+		}
+
+		return sphere;
 	}
-	*/
+	
 	ew::MeshData createCylinder(float height, float radius, int numSegments) {
 		ew::MeshData cylinder;
 
 		//Vertices
 		float topY = height / 2;
-		
+
 		float bottomY = -topY;
 
 		ew::Vertex top;
 		top.pos.x = 0;
 		top.pos.y = topY;
 		top.pos.z = 0;
+		top.normal = ew::Vec3(0,1.0,0);
+		top.uv = ew::Vec2(0.5,0.5);
 		cylinder.vertices.push_back(top);
 
+		ew::Vertex bot;
+		bot.pos.x = 0;
+		bot.pos.y = bottomY;
+		bot.pos.z = 0;
+		bot.normal = ew::Vec3(0, -1.0, 0);
+		bot.uv = ew::Vec2(0.5, 0.5);
+		cylinder.vertices.push_back(bot);
 
 		//Up top normals
 		float thetaStep = (2 * ew::PI) / numSegments;
@@ -34,16 +103,35 @@ namespace slib {
 			v.pos.y = topY;
 
 			//Normals
-			//v.normal = ew::Vec3{0,1.0,0};
+			v.normal = ew::Vec3(0,1.0,0);
 
 			//UVs
-			//
+			v.uv.x = cos(theta) * 0.5 + 0.5;
+			v.uv.y = sin(theta) * 0.5 + 0.5;
+
+			cylinder.vertices.push_back(v);
+		}
+		
+		//Down bottom normals
+		for (int i = 0; i <= numSegments; i++)
+		{
+			float theta = i * thetaStep;
+			ew::Vertex v;
+			v.pos.x = cos(theta) * radius;
+			v.pos.z = sin(theta) * radius;
+			v.pos.y = bottomY;
+
+			//Normals
+			v.normal = ew::Vec3(0,-1.0,0);
+
+			//UVs
+			v.uv.x = cos(theta) * 0.5 + 0.5;
+			v.uv.y = sin(theta) * 0.5 + 0.5;
 
 			cylinder.vertices.push_back(v);
 		}
 
 		//Side top normals
-		/*
 		for (int i = 0; i <= numSegments; i++)
 		{
 			float theta = i * thetaStep;
@@ -52,7 +140,12 @@ namespace slib {
 			v2.pos.z = sin(theta) * radius;
 			v2.pos.y = topY;
 
-			v2.normal = ew::Vec3{ cos(theta), 0, sin(theta) };
+			//Normals
+			v2.normal = ew::Vec3(cos(theta), 0, sin(theta));
+
+			//UVs
+			v2.uv.y = 1;
+			v2.uv.x = (float)i / (float)numSegments;
 
 			cylinder.vertices.push_back(v2);
 		}
@@ -66,55 +159,39 @@ namespace slib {
 			v2.pos.z = sin(theta) * radius;
 			v2.pos.y = bottomY;
 
-			v2.normal = ew::Vec3{ cos(theta), 0, sin(theta) };
+			//Normals
+			v2.normal = ew::Vec3(cos(theta), 0, sin(theta));
+
+			//UVs
+			v2.uv.y = 0;
+			v2.uv.x = (float)i / (float)numSegments;
 
 			cylinder.vertices.push_back(v2);
 		}
-		*/
-		//Down bottom normals
-		for (int i = 0; i <= numSegments; i++)
-		{
-			float theta = i * thetaStep;
-			ew::Vertex v;
-			v.pos.x = cos(theta) * radius;
-			v.pos.z = sin(theta) * radius;
-			v.pos.y = bottomY;
 
-			//Normals
-			v.normal = ew::Vec3{ 0,1.0,0 };
-
-			cylinder.vertices.push_back(v);
-		}
-		
-		ew::Vertex bot;
-		bot.pos.x = 0;
-		bot.pos.y = bottomY;
-		bot.pos.z = 0;
-		cylinder.vertices.push_back(bot);
-		
 		//Indices
-		int start = 1;
+		int start = 2;
 		int center = 0;
-		
+
 		//Top indices
 		for (int i = 0; i < numSegments; i++)
 		{
-			cylinder.indices.push_back(start+i);
+			cylinder.indices.push_back(start + i);
 			cylinder.indices.push_back(center);
 			cylinder.indices.push_back(start + i + 1);
 		}
-		
+
 		//Bottom indices
-		start = cylinder.vertices.size() / 2;
-		center = cylinder.vertices.size() - 1;
-		for (int i = 0; i <= numSegments; i++)
+		start = 3 + numSegments;
+		center = 1;
+		for (int i = 0; i < numSegments; i++)
 		{
 			cylinder.indices.push_back(center);
 			cylinder.indices.push_back(start + i);
 			cylinder.indices.push_back(start + i + 1);
 		}
-		
-		int sideStart = 1;
+
+		int sideStart = 2 + 2 * (numSegments + 1);
 		int columns = numSegments + 1;
 		for (int i = 0; i < columns; i++)
 		{
@@ -133,7 +210,7 @@ namespace slib {
 
 		return cylinder;
 	}
-	
+
 
 	ew::MeshData createPlane(float width, float height, int subdivisions) {
 		ew::MeshData plane;
@@ -162,8 +239,8 @@ namespace slib {
 
 				//Top left triangle...
 				plane.indices.push_back(start);
-				plane.indices.push_back(start+columns+1);
-				plane.indices.push_back(start+columns);
+				plane.indices.push_back(start + columns + 1);
+				plane.indices.push_back(start + columns);
 			}
 		}
 		return plane;
