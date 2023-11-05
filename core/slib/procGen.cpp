@@ -13,13 +13,17 @@ namespace slib {
 
 		//Vertices
 		float topY = height / 2;
-		//height * i - 0.5;
 		
 		float bottomY = -topY;
 
-		cylinder.vertices.push_back({0,topY,0});
-		cylinder.vertices.push_back({ 0,bottomY,0 });
+		ew::Vertex top;
+		top.pos.x = 0;
+		top.pos.y = topY;
+		top.pos.z = 0;
+		cylinder.vertices.push_back(top);
 
+
+		//Up top normals
 		float thetaStep = (2 * ew::PI) / numSegments;
 		for (int i = 0; i <= numSegments; i++)
 		{
@@ -28,9 +32,46 @@ namespace slib {
 			v.pos.x = cos(theta) * radius;
 			v.pos.z = sin(theta) * radius;
 			v.pos.y = topY;
+
+			//Normals
+			//v.normal = ew::Vec3{0,1.0,0};
+
+			//UVs
+			//
+
 			cylinder.vertices.push_back(v);
 		}
-		
+
+		//Side top normals
+		/*
+		for (int i = 0; i <= numSegments; i++)
+		{
+			float theta = i * thetaStep;
+			ew::Vertex v2;
+			v2.pos.x = cos(theta) * radius;
+			v2.pos.z = sin(theta) * radius;
+			v2.pos.y = topY;
+
+			v2.normal = ew::Vec3{ cos(theta), 0, sin(theta) };
+
+			cylinder.vertices.push_back(v2);
+		}
+
+		//Side bottom normals
+		for (int i = 0; i <= numSegments; i++)
+		{
+			float theta = i * thetaStep;
+			ew::Vertex v2;
+			v2.pos.x = cos(theta) * radius;
+			v2.pos.z = sin(theta) * radius;
+			v2.pos.y = bottomY;
+
+			v2.normal = ew::Vec3{ cos(theta), 0, sin(theta) };
+
+			cylinder.vertices.push_back(v2);
+		}
+		*/
+		//Down bottom normals
 		for (int i = 0; i <= numSegments; i++)
 		{
 			float theta = i * thetaStep;
@@ -38,11 +79,21 @@ namespace slib {
 			v.pos.x = cos(theta) * radius;
 			v.pos.z = sin(theta) * radius;
 			v.pos.y = bottomY;
+
+			//Normals
+			v.normal = ew::Vec3{ 0,1.0,0 };
+
 			cylinder.vertices.push_back(v);
 		}
-
+		
+		ew::Vertex bot;
+		bot.pos.x = 0;
+		bot.pos.y = bottomY;
+		bot.pos.z = 0;
+		cylinder.vertices.push_back(bot);
+		
 		//Indices
-		int start = 2;
+		int start = 1;
 		int center = 0;
 		
 		//Top indices
@@ -54,13 +105,15 @@ namespace slib {
 		}
 		
 		//Bottom indices
+		start = cylinder.vertices.size() / 2;
+		center = cylinder.vertices.size() - 1;
 		for (int i = 0; i <= numSegments; i++)
 		{
 			cylinder.indices.push_back(center);
 			cylinder.indices.push_back(start + i);
 			cylinder.indices.push_back(start + i + 1);
 		}
-		/*
+		
 		int sideStart = 1;
 		int columns = numSegments + 1;
 		for (int i = 0; i < columns; i++)
@@ -74,10 +127,10 @@ namespace slib {
 
 			//Triangle 2
 			cylinder.indices.push_back(start + 1);
-			cylinder.indices.push_back(start + columns);
 			cylinder.indices.push_back(start + columns + 1);
+			cylinder.indices.push_back(start + columns);
 		}
-		*/
+
 		return cylinder;
 	}
 	
