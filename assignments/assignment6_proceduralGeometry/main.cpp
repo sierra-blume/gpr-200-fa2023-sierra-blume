@@ -79,18 +79,10 @@ int main() {
 	ew::Shader shader("assets/vertexShader.vert", "assets/fragmentShader.frag");
 	unsigned int brickTexture = ew::loadTexture("assets/brick_color.jpg",GL_REPEAT,GL_LINEAR);
 
-	//Create cube
-	ew::MeshData cubeMeshData = ew::createCube(0.5f);
-	ew::Mesh cubeMesh(cubeMeshData);
-
-	ew::MeshData planeMeshData = slib::createPlane(1,1,5);
-	ew::Mesh planeMesh(planeMeshData);
-
-	ew::MeshData cylinderMeshData = slib::createCylinder(1, .5, 8);
-	ew::Mesh cylinderMesh(cylinderMeshData);
-
-	ew::MeshData sphereMeshData = slib::createSphere(1, 16);
-	ew::Mesh sphereMesh(sphereMeshData);
+	float cubeSize = 0.5f;
+	float pWidth = 1, pHeight = 1, pSegments = 5;
+	float cHeight = 1, cRad = .5, cSegments = 8;
+	float sRad = 1, sSegments = 16;
 
 	//Initialize transforms
 	ew::Transform cubeTransform;
@@ -133,6 +125,17 @@ int main() {
 		ew::Vec3 lightF = ew::Vec3(sinf(lightRot.y) * cosf(lightRot.x), sinf(lightRot.x), -cosf(lightRot.y) * cosf(lightRot.x));
 		shader.setVec3("_LightDir", lightF);
 
+		//Create cubes
+		ew::MeshData cubeMeshData = ew::createCube(cubeSize);
+		ew::MeshData planeMeshData = slib::createPlane(pWidth, pHeight, pSegments);
+		ew::MeshData cylinderMeshData = slib::createCylinder(cHeight, cRad, cSegments);
+		ew::MeshData sphereMeshData = slib::createSphere(sRad, sSegments);
+
+		ew::Mesh cubeMesh(cubeMeshData);
+		ew::Mesh planeMesh(planeMeshData);
+		ew::Mesh cylinderMesh(cylinderMeshData);
+		ew::Mesh sphereMesh(sphereMeshData);
+
 		//Draw cube
 		shader.setMat4("_Model", cubeTransform.getModelMatrix());
 		cubeMesh.draw((ew::DrawMode)appSettings.drawAsPoints);
@@ -166,6 +169,35 @@ int main() {
 				ImGui::DragFloat("Sprint Speed", &cameraController.sprintMoveSpeed, 0.1f);
 				if (ImGui::Button("Reset")) {
 					resetCamera(camera, cameraController);
+				}
+			}
+			if (ImGui::CollapsingHeader("Dynamic")) {
+				if (ImGui::CollapsingHeader("Cube")) {
+					ImGui::DragFloat("Size", &cubeSize, .1, .5, 100000);
+				}
+
+				if (ImGui::CollapsingHeader("Plane")) {
+					ImGui::DragFloat("Width", &pWidth, .1, 1, 100000);
+					ImGui::DragFloat("Height", &pHeight, .1, 1, 100000);
+					ImGui::DragFloat("Segments", &pSegments, 1, 1, 100000);
+				}
+
+				if (ImGui::CollapsingHeader("Cylinder")) {
+					ImGui::DragFloat("Height", &cHeight, .1, .5, 100);
+					ImGui::DragFloat("Cylinder Radius", &cRad, .1, .5, 100);
+					ImGui::DragFloat("Segments", &cSegments, 1, 3, 100000);
+				}
+
+				if (ImGui::CollapsingHeader("Sphere")) {
+					ImGui::DragFloat("Sphere Radius", &sRad, .1, .5, 100);
+					ImGui::DragFloat("Segments", &sSegments, 1, 3, 100000);
+				}
+
+				if (ImGui::Button("Reset")) {
+					cubeSize = 0.5f;
+					pWidth = 1, pHeight = 1, pSegments = 5;
+					cHeight = 1, cRad = .5, cSegments = 8;
+					sRad = 1, sSegments = 16;
 				}
 			}
 

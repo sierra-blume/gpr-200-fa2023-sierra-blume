@@ -4,6 +4,12 @@
 #include "procGen.h"
 
 namespace slib {
+	/*ew::MeshData createTorus(float radius, float thickness, float numSegmentsOut, float numSegmentsIn) {
+		ew::MeshData torus;
+
+
+	}*/
+
 	ew::MeshData createSphere(float radius, int numSegments) {
 		ew::MeshData sphere;
 
