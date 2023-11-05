@@ -4,11 +4,48 @@
 #include "procGen.h"
 
 namespace slib {
-	/*ew::MeshData createTorus(float radius, float thickness, float numSegmentsOut, float numSegmentsIn) {
+	ew::MeshData createTorus(float radius, float thickness, int numSegmentsOut, int numSegmentsIn) {
 		ew::MeshData torus;
 
+		float outStep = (2 * ew::PI) / numSegmentsOut;
+		float inStep = (2 * ew::PI) / numSegmentsIn;
 
-	}*/
+		for (int row = 0; row <= numSegmentsOut; row++)
+		{
+			float thetaOut = row * outStep;
+			ew::Vec3 outPos = ew::Vec3(cos(thetaOut), sin(thetaOut), 0) * radius;
+			for (int col = 0; col <= numSegmentsIn; col++)
+			{
+				float thetaIn = col * inStep;
+				ew::Vec3 inPos = ew::Vec3(cos(thetaOut) * cos(thetaIn), cos(thetaIn) * sin(thetaOut), sin(thetaIn)) * thickness;
+				ew::Vertex v;
+				v.pos = inPos + outPos;
+				v.normal = ew::Normalize(inPos);
+				v.uv = ew::Vec2((float)col / (float)numSegmentsIn, (float)row / (float)numSegmentsOut);
+				torus.vertices.push_back(v);
+			}
+		}
+
+		int columns = numSegmentsIn + 1;
+		for (int i = 0; i < numSegmentsOut; i++)
+		{
+			for (int j = 0; j < numSegmentsIn; j++)
+			{
+				int start = i * columns + j;
+
+				torus.indices.push_back(start + 1);
+				torus.indices.push_back(start);
+				torus.indices.push_back(start + columns);
+
+				//Triangle 2
+				torus.indices.push_back(start + columns + 1);
+				torus.indices.push_back(start + 1);
+				torus.indices.push_back(start + columns);
+			}
+		}
+
+		return torus;
+	}
 
 	ew::MeshData createSphere(float radius, int numSegments) {
 		ew::MeshData sphere;
@@ -26,8 +63,7 @@ namespace slib {
 				v.pos.y = radius * cos(phi);
 				v.pos.z = radius * sin(theta) * sin(phi);
 				v.normal = ew::Normalize(v.pos);
-				v.uv.x = (float)col / (float)numSegments;
-				v.uv.y = (float)row / (float)numSegments;
+				v.uv = ew::Vec2((float)col / (float)numSegments, (float)row / (float)numSegments);
 				sphere.vertices.push_back(v);
 			}
 		}
@@ -112,8 +148,7 @@ namespace slib {
 			v.normal = ew::Vec3(0,1.0,0);
 
 			//UVs
-			v.uv.x = cos(theta) * 0.5 + 0.5;
-			v.uv.y = sin(theta) * 0.5 + 0.5;
+			v.uv = ew::Vec2(cos(theta) * 0.5 + 0.5, sin(theta) * 0.5 + 0.5);
 
 			cylinder.vertices.push_back(v);
 		}
@@ -131,8 +166,7 @@ namespace slib {
 			v.normal = ew::Vec3(0,-1.0,0);
 
 			//UVs
-			v.uv.x = cos(theta) * 0.5 + 0.5;
-			v.uv.y = sin(theta) * 0.5 + 0.5;
+			v.uv = ew::Vec2(cos(theta) * 0.5 + 0.5, sin(theta) * 0.5 + 0.5);
 
 			cylinder.vertices.push_back(v);
 		}
@@ -150,8 +184,7 @@ namespace slib {
 			v2.normal = ew::Vec3(cos(theta), 0, sin(theta));
 
 			//UVs
-			v2.uv.y = 1;
-			v2.uv.x = (float)i / (float)numSegments;
+			v2.uv = ew::Vec2((float)i / (float)numSegments, 1);
 
 			cylinder.vertices.push_back(v2);
 		}
@@ -169,8 +202,7 @@ namespace slib {
 			v2.normal = ew::Vec3(cos(theta), 0, sin(theta));
 
 			//UVs
-			v2.uv.y = 0;
-			v2.uv.x = (float)i / (float)numSegments;
+			v2.uv = ew::Vec2((float)i / (float)numSegments, 0);
 
 			cylinder.vertices.push_back(v2);
 		}

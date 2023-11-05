@@ -83,17 +83,20 @@ int main() {
 	float pWidth = 1, pHeight = 1, pSegments = 5;
 	float cHeight = 1, cRad = .5, cSegments = 8;
 	float sRad = 1, sSegments = 16;
+	float tRad = .5, tThickness = .3, tSegmentsOut = 10, tSegmentsIn = 8;
 
 	//Initialize transforms
 	ew::Transform cubeTransform;
 	ew::Transform planeTransform;
 	ew::Transform cylinderTransform;
 	ew::Transform sphereTransform;
+	ew::Transform torusTransform;
 
 	//Moving objects to be in a line
 	planeTransform.position = ew::Vec3(1, 0, .5);
 	cylinderTransform.position = ew::Vec3(3, 0, 0);
 	sphereTransform.position = ew::Vec3(5, 0, 0);
+	torusTransform.position = ew::Vec3(8, 0, 0);
 
 	resetCamera(camera,cameraController);
 
@@ -130,11 +133,13 @@ int main() {
 		ew::MeshData planeMeshData = slib::createPlane(pWidth, pHeight, pSegments);
 		ew::MeshData cylinderMeshData = slib::createCylinder(cHeight, cRad, cSegments);
 		ew::MeshData sphereMeshData = slib::createSphere(sRad, sSegments);
+		ew::MeshData torusMeshData = slib::createTorus(tRad, tThickness, tSegmentsOut, tSegmentsIn);
 
 		ew::Mesh cubeMesh(cubeMeshData);
 		ew::Mesh planeMesh(planeMeshData);
 		ew::Mesh cylinderMesh(cylinderMeshData);
 		ew::Mesh sphereMesh(sphereMeshData);
+		ew::Mesh torusMesh(torusMeshData);
 
 		//Draw cube
 		shader.setMat4("_Model", cubeTransform.getModelMatrix());
@@ -145,6 +150,8 @@ int main() {
 		cylinderMesh.draw((ew::DrawMode)appSettings.drawAsPoints);
 		shader.setMat4("_Model", sphereTransform.getModelMatrix());
 		sphereMesh.draw((ew::DrawMode)appSettings.drawAsPoints);
+		shader.setMat4("_Model", torusTransform.getModelMatrix());
+		torusMesh.draw((ew::DrawMode)appSettings.drawAsPoints);
 
 		//Render UI
 		{
@@ -193,11 +200,19 @@ int main() {
 					ImGui::DragFloat("Segments", &sSegments, 1, 3, 100000);
 				}
 
+				if (ImGui::CollapsingHeader("Torus")) {
+					ImGui::DragFloat("Torus Radius", &tRad, .1, .5, 100);
+					ImGui::DragFloat("Thickness", &tThickness, .1, .3, 100);
+					ImGui::DragFloat("Outer Segments", &tSegmentsOut, 1, 3, 1000);
+					ImGui::DragFloat("Inner Segments", &tSegmentsIn, 1, 3, 1000);
+				}
+
 				if (ImGui::Button("Reset")) {
 					cubeSize = 0.5f;
 					pWidth = 1, pHeight = 1, pSegments = 5;
 					cHeight = 1, cRad = .5, cSegments = 8;
 					sRad = 1, sSegments = 16;
+					tRad = .5, tThickness = .3, tSegmentsOut = 10, tSegmentsIn = 8;
 				}
 			}
 
