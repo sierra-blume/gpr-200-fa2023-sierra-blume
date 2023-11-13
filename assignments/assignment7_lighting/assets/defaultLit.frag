@@ -7,31 +7,46 @@ in Surface{
 	vec3 WNormal; //Pre-fragment interpolated world normal
 }fs_in;
 
+uniform sampler2D _Texture;
+
 struct Light
 {
 	vec3 position;
 	vec3 color;
 };
-uniform Light _Light;
+#define MAX_LIGHTS 4
+uniform Light _Lights[MAX_LIGHTS];
 
-uniform sampler2D _Texture;
-
-float vAmbient;
-float vDiffuse;
-float vSpecular;
-float vShine;
+uniform vec3 cameraPos;
+uniform int numLights;
+uniform float vAmbient;
+uniform float vDiffuse;
+uniform float vSpecular;
+uniform float vShine;
 
 void main(){
-	FragColor = texture(_Texture,fs_in.UV);
 	vec3 normal = normalize(fs_in.WNormal);
-	vec3 lightDir = normalize(_Light.position - fs_in.WPosition);
+	vec3 cameraDir = normalize(cameraPos - fs_in.WPosition);
+	vec3 lightColor = vec3(0);
 
 	//TODO: Lighting calculations using corrected normal
-	//max(x,0)
-	float diffAngle = max(dot(normal, lightDir),0);
-	vec3 diffuse = _Light.color * diffAngle;
+	for(int i = 0; i < numLights; i++)
+	{
+		vec3 lightDir = normalize(_Lights[i].position - fs_in.WPosition);
 
-	//Do specular calculations
+		float diffAngle = max(dot(normal, lightDir),0);
+		vec3 diffuse = _Lights[i].color * vDiffuse* diffAngle;
 
-	//add diffuse and specular together
+		//Do specular calculations
+		vec3 halfVec = normalize(lightDir + cameraDir);
+		float specAngle = max(dot(halfVec, normal), 0);
+		vec3 specular = _Lights[i].color * vSpecular * pow(specAngle, vShine);
+
+		lightColor += (diffuse + specular) * 0.5;
+	}
+
+	lightColor += vAmbient;
+
+	vec4 textColor = texture(_Texture, fs_in.UV);
+	FragColor = vec4(textColor.rgb * lightColor, textColor.a);
 }
