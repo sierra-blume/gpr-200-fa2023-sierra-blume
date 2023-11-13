@@ -23,6 +23,7 @@ uniform float vAmbient;
 uniform float vDiffuse;
 uniform float vSpecular;
 uniform float vShine;
+uniform int phong;
 
 void main(){
 	vec3 normal = normalize(fs_in.WNormal);
@@ -37,10 +38,19 @@ void main(){
 		float diffAngle = max(dot(normal, lightDir),0);
 		vec3 diffuse = _Lights[i].color * vDiffuse* diffAngle;
 
-		//Do specular calculations
-		vec3 halfVec = normalize(lightDir + cameraDir);
-		float specAngle = max(dot(halfVec, normal), 0);
-		vec3 specular = _Lights[i].color * vSpecular * pow(specAngle, vShine);
+		vec3 specular = {0,0,0};
+
+		if(phong == 0){
+			//Blinn-Phong specular calculations
+			vec3 halfVec = normalize(lightDir + cameraDir);
+			float specAngle = max(dot(halfVec, normal), 0);
+			specular = _Lights[i].color * vSpecular * pow(specAngle, vShine);
+		}
+		else{
+			//Phong specular calculations
+			vec3 r = reflect(-lightDir, normal);
+			specular = _Lights[i].color * vSpecular * pow(max(dot(r, cameraDir), 0), vShine);
+		}
 
 		lightColor += (diffuse + specular) * 0.5;
 	}

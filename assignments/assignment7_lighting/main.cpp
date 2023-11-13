@@ -118,6 +118,8 @@ int main() {
 	material.shine = 50.0;
 	float orbitRad = 2;
 	bool orbit = false;
+	bool phong = false;
+	int phongSpecular = 0;
 
 	while (!glfwWindowShouldClose(window)) {
 		glfwPollEvents();
@@ -126,6 +128,13 @@ int main() {
 		float deltaTime = time - prevTime;
 		prevTime = time;
 		
+		if (phong == true) {
+			phongSpecular = 1;
+		}
+		else {
+			phongSpecular = 0;
+		}
+
 		if (orbit == true)
 		{
 			for (int i = 0; i < 4; i++)
@@ -152,6 +161,7 @@ int main() {
 		shader.setFloat("vDiffuse", material.diffuseK);
 		shader.setFloat("vSpecular", material.specular);
 		shader.setFloat("vShine", material.shine);
+		shader.setInt("phong", phongSpecular);
 
 		for (int i = 0; i < numLights; i++)
 		{
@@ -215,6 +225,7 @@ int main() {
 					ImGui::SliderInt("Num Lights", &numLights, 1, 4);
 					ImGui::Checkbox("Orbit Lights", &orbit);
 					ImGui::SliderFloat("Orbit Radius", &orbitRad, 2, 10);
+					ImGui::Checkbox("Phong", &phong);
 				}
 			}
 
