@@ -220,7 +220,7 @@ int main() {
 
 			for (int i = 0; i < numLights; i++) {
 				if (ImGui::CollapsingHeader(("Light " + std::to_string(i + 1)).c_str())) {
-					ImGui::DragFloat3("Position", &lightTransform[i].position.x, 0.1, -10.0, 10.0);
+					ImGui::DragFloat3("Position", &light[i].position.x, 0, -10.0, 10.0);
 					ImGui::ColorEdit3(("Light " + std::to_string(i + 1) + " Color").c_str(), &light[i].color.x);
 				}
 			}
